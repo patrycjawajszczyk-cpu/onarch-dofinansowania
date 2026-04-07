@@ -4,18 +4,32 @@ import { FUNDING_SOURCES } from '../lib/templates'
 import { format, differenceInDays } from 'date-fns'
 import { Send, Bell } from 'lucide-react'
 
+async function sendEmailJS(templateParams) {
+  const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
+  const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+  const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+
+  const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      service_id: serviceId,
+      template_id: templateId,
+      user_id: publicKey,
+      template_params: templateParams
+    })
+  })
+  if (!response.ok) throw new Error('EmailJS error: ' + response.status)
+}
+
 export default function Reminders() {
   const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(true)
-  const [webhookUrl, setWebhookUrl] = useState('')
   const [sending, setSending] = useState({})
   const [sent, setSent] = useState({})
   const [days, setDays] = useState(7)
 
-  useEffect(() => {
-    setWebhookUrl(localStorage.getItem('make_webhook_url') || '')
-    load()
-  }, [])
+  useEffect(() => { load() }, [])
 
   async function load() {
     const { data } = await supabase
@@ -35,24 +49,21 @@ export default function Reminders() {
   })
 
   async function sendReminder(doc) {
-    if (!webhookUrl) { alert('Wpisz URL webhooka Make.com w Ustawieniach!'); return }
     setSending(p => ({...p, [doc.id]: true}))
     try {
-      await fetch(webhookUrl, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          document_name: doc.name,
-          participant: doc.contracts?.participant_name,
-          course: doc.contracts?.course_name,
-          contract_number: doc.contracts?.contract_number,
-          due_date: doc.due_date,
-          days_left: differenceInDays(new Date(doc.due_date), today),
-          source: doc.contracts?.source,
-        })
+      await sendEmailJS({
+        document_name: doc.name,
+        participant: doc.contracts?.participant_name || '',
+        course: doc.contracts?.course_name || '',
+        contract_number: doc.contracts?.contract_number || '',
+        due_date: doc.due_date,
+        days_left: differenceInDays(new Date(doc.due_date), today),
+        source: doc.contracts?.source || '',
       })
       setSent(p => ({...p, [doc.id]: true}))
-    } catch(e) { alert('Błąd wysyłki') }
+    } catch(e) {
+      alert('Blad wysylki: ' + e.message)
+    }
     setSending(p => ({...p, [doc.id]: false}))
   }
 
@@ -61,6 +72,7 @@ export default function Reminders() {
   }
 
   const getSourceLabel = (val) => FUNDING_SOURCES.find(s => s.value === val)?.label || val
+
   const daysLabel = (d) => {
     const diff = differenceInDays(new Date(d), today)
     if (diff < 0) return <span style={{color:'var(--red)',fontWeight:700}}>Zaległe ({Math.abs(diff)}d)</span>
@@ -68,6 +80,8 @@ export default function Reminders() {
     if (diff === 1) return <span style={{color:'var(--orange)',fontWeight:700}}>Jutro</span>
     return <span style={{color: diff<=7 ? 'var(--orange)' : 'var(--navy)',fontWeight:700}}>za {diff} dni</span>
   }
+
+  const emailjsOk = import.meta.env.VITE_EMAILJS_SERVICE_ID
 
   return (
     <div>
@@ -79,20 +93,20 @@ export default function Reminders() {
             <option value={14}>Następne 14 dni</option>
             <option value={30}>Następne 30 dni</option>
           </select>
-          {webhookUrl && upcoming.length > 0 && (
+          {emailjsOk && upcoming.length > 0 && (
             <button className="btn btn-terra" onClick={sendAll}><Send size={15}/> Wyślij wszystkie ({upcoming.length})</button>
           )}
         </div>
       </div>
 
-      {!webhookUrl && (
+      {!emailjsOk && (
         <div className="card" style={{borderLeft:'4px solid var(--gold)',marginBottom:20}}>
           <div style={{display:'flex',alignItems:'center',gap:10}}>
             <Bell size={18} color="var(--gold)"/>
             <div>
-              <strong>Skonfiguruj e-maile z Make.com</strong>
+              <strong>Skonfiguruj e-maile</strong>
               <p style={{fontSize:13,color:'var(--gray-500)',marginTop:2}}>
-                Dodaj URL webhooka Make.com w <a href="/ustawienia" style={{color:'var(--terra)'}}>Ustawieniach</a>, żeby wysyłać powiadomienia e-mail jednym kliknięciem.
+                Dodaj zmienne EmailJS w Vercel: VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY
               </p>
             </div>
           </div>
@@ -120,7 +134,7 @@ export default function Reminders() {
             <div style={{textAlign:'right',flexShrink:0}}>
               <div style={{fontSize:13,marginBottom:6}}>{daysLabel(doc.due_date)}</div>
               <div style={{fontSize:12,color:'var(--gray-500)',marginBottom:8}}>{format(new Date(doc.due_date),'dd.MM.yyyy')}</div>
-              {webhookUrl && (
+              {emailjsOk && (
                 <button
                   className={`btn btn-sm ${sent[doc.id] ? 'btn-gold' : 'btn-ghost'}`}
                   onClick={() => sendReminder(doc)}
