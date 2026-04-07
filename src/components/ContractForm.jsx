@@ -37,10 +37,15 @@ async function extractWithClaude(file) {
   const systemPrompt = `Jestes asystentem analizujacym polskie umowy szkoleniowe i dofinansowania. Wyodrebnij dane i zwroc TYLKO JSON bez zadnego tekstu przed ani po: {"contract_number":"...lub null","participant_name":"...lub null","course_name":"...lub null","start_date":"YYYY-MM-DD lub null","end_date":"YYYY-MM-DD lub null","value":liczba_lub_null,"ordering_party":"...lub null","source_hint":"...lub null","notes":"...lub null"}`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
+    'anthropic-version': '2023-06-01',
+    'anthropic-dangerous-direct-browser-access': 'true',
+  },
+  body: JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
       system: systemPrompt,
       messages: [{
