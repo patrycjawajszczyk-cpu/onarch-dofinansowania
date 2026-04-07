@@ -7,7 +7,7 @@ export default function Layout({ children }) {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img src="/logo.png" alt="ON-ARCH" style={{width:'130px',filter:'brightness(0) invert(1)',marginBottom:4}}/>
+          <img src="/logo.png" alt="ON-ARCH" style={{width:'130px',marginBottom:4}}/>
           <span className="logo-sub">Panel Dofinansowań</span>
         </div>
         <nav className="sidebar-nav">
