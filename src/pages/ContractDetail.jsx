@@ -91,6 +91,11 @@ export default function ContractDetail() {
     setDocuments(prev => prev.map(d => d.id === docId ? { ...d, due_date } : d))
   }
 
+  async function updateDocUrl(docId, drive_url) {
+    await supabase.from('documents').update({ drive_url }).eq('id', docId)
+    setDocuments(prev => prev.map(d => d.id === docId ? { ...d, drive_url } : d))
+  }
+
   async function addDoc() {
     if (!newDocName.trim()) return
     const { data } = await supabase.from('documents').insert({
@@ -225,6 +230,19 @@ export default function ContractDetail() {
                   <select value={doc.status} onChange={e => updateDocStatus(doc.id, e.target.value)} style={{width:140,fontSize:12,padding:'4px 8px'}}>
                     {Object.entries(STATUS_LABELS).map(([k,v]) => <option key={k} value={k}>{v.label}</option>)}
                   </select>
+                  <input
+                    type="text"
+                    value={doc.drive_url || ''}
+                    onChange={e => updateDocUrl(doc.id, e.target.value)}
+                    placeholder="Link Google Drive..."
+                    style={{width:180,fontSize:12,padding:'4px 8px'}}
+                    onClick={e => e.stopPropagation()}
+                  />
+                  {doc.drive_url && (
+                    <a href={doc.drive_url} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{padding:'4px 8px',color:'var(--navy)'}} title="Otwórz w Google Drive">
+                      ↗
+                    </a>
+                  )}
                   <button className="btn btn-ghost btn-sm" style={{padding:'4px 8px'}} onClick={() => deleteDoc(doc.id)}><X size={12}/></button>
                 </div>
               </div>
