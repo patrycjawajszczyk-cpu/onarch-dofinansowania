@@ -32,23 +32,39 @@ export default function ContractDetail() {
     setLoading(false)
   }
 
+  function generateMonthlyDocs(contractId, t, startDate, endDate) {
+    const docs = []
+    const MONTHS = ['styczen','luty','marzec','kwiecien','maj','czerwiec','lipiec','sierpien','wrzesien','pazdziernik','listopad','grudzien']
+    const end = new Date(endDate)
+    let cur = new Date(new Date(startDate).getFullYear(), new Date(startDate).getMonth(), 1)
+    while (cur <= end) {
+      const due = new Date(cur.getFullYear(), cur.getMonth() + 1, 3)
+      docs.push({ contract_id: contractId, name: t.name + ' – ' + MONTHS[cur.getMonth()] + ' ' + cur.getFullYear(), period: 'monthly', due_date: due.toISOString().split('T')[0], status: 'pending', note: 'Do 3. dnia nastepnego miesiaca' })
+      cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1)
+    }
+    return docs
+  }
+
   async function handleSave(formData) {
     if (isNew) {
       const { data: c, error } = await supabase.from('contracts').insert(formData).select().single()
       if (!error && c) {
-        // Auto-generate documents from template
         const template = DOC_TEMPLATES[formData.source] || []
-        if (template.length > 0) {
-          const docs = template.map(t => ({
-            contract_id: c.id,
-            name: t.name,
-            period: t.period,
-            due_date: null,
-            status: 'pending',
-            note: t.note,
-          }))
-          await supabase.from('documents').insert(docs)
+        const docs = []
+        for (const t of template) {
+          if (t.period === 'monthly' && formData.start_date && formData.end_date) {
+            docs.push(...generateMonthlyDocs(c.id, t, formData.start_date, formData.end_date))
+          } else if (t.period === 'post_course' && formData.end_date) {
+            const due = new Date(formData.end_date); due.setDate(due.getDate() + Math.abs(t.offset_days || 7))
+            docs.push({ contract_id: c.id, name: t.name, period: t.period, due_date: due.toISOString().split('T')[0], status: 'pending', note: t.note })
+          } else if (t.period === 'once' && t.offset_days < 0 && formData.start_date) {
+            const due = new Date(formData.start_date); due.setDate(due.getDate() + t.offset_days)
+            docs.push({ contract_id: c.id, name: t.name, period: t.period, due_date: due.toISOString().split('T')[0], status: 'pending', note: t.note })
+          } else {
+            docs.push({ contract_id: c.id, name: t.name, period: t.period, due_date: null, status: 'pending', note: t.note })
+          }
         }
+        if (docs.length > 0) await supabase.from('documents').insert(docs)
         navigate(`/umowy/${c.id}`)
       }
     } else {
