@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { FUNDING_SOURCES, DOC_TEMPLATES, STATUS_LABELS, CONTRACT_STATUS } from '../lib/templates'
 import { format } from 'date-fns'
-import { ArrowLeft, Pencil, Trash2, Plus, Check, X } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2, Plus, Check, X, Receipt } from 'lucide-react'
 import ContractForm from '../components/ContractForm'
 import './ContractDetail.css'
 
@@ -173,6 +173,31 @@ export default function ContractDetail() {
         <div className="card">
           <div className="info-label">Wartość umowy</div>
           <div className="info-value">{contract.value ? `${Number(contract.value).toLocaleString('pl-PL')} zł` : '—'}</div>
+        </div>
+        <div className="card">
+          <div className="info-label">Postęp dokumentacji</div>
+          <div className="card" style={{display:'flex',alignItems:'center',gap:12}}>
+          <Receipt size={18} color={contract.invoice_paid ? '#166534' : 'var(--gray-400)'}/>
+          <div style={{flex:1}}>
+            <div className="info-label">Faktura opłacona</div>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4}}>
+              <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',userSelect:'none'}}>
+                <input
+                  type="checkbox"
+                  checked={!!contract.invoice_paid}
+                  onChange={async e => {
+                    const val = e.target.checked
+                    await supabase.from('contracts').update({ invoice_paid: val }).eq('id', id)
+                    setContract(prev => ({ ...prev, invoice_paid: val }))
+                  }}
+                  style={{width:16,height:16,accentColor:'#166534',cursor:'pointer'}}
+                />
+                <span style={{fontSize:13,fontWeight:600,color: contract.invoice_paid ? '#166534' : 'var(--gray-500)'}}>
+                  {contract.invoice_paid ? 'Tak — faktura opłacona' : 'Nie opłacono jeszcze'}
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
         <div className="card">
           <div className="info-label">Postęp dokumentacji</div>
