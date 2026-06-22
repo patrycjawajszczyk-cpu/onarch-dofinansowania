@@ -163,7 +163,8 @@ export default function ContractDetail() {
           </div>
         </div>
       )}
-{/* Info cards */}
+
+      {/* Info cards */}
       <div className="detail-grid">
         <div className="card">
           <div className="info-label">Termin realizacji</div>
@@ -194,26 +195,6 @@ export default function ContractDetail() {
             </label>
           </div>
         </div>
-        <div className="card">
-          <div className="info-label">Postęp dokumentacji</div>
-          <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4}}>
-            <div style={{flex:1,height:8,background:'var(--gray-200)',borderRadius:4,overflow:'hidden'}}>
-              <div style={{width:`${progress}%`,height:'100%',background:'var(--terra)',borderRadius:4,transition:'width 0.3s'}}/>
-            </div>
-            <span style={{fontWeight:700,fontSize:13}}>{doneCount}/{documents.filter(d=>d.status!=='not_applicable').length}</span>
-          </div>
-        </div>
-      </div>
-        <div className="card">
-          <div className="info-label">Postęp dokumentacji</div>
-          <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4}}>
-            <div style={{flex:1,height:8,background:'var(--gray-200)',borderRadius:4,overflow:'hidden'}}>
-              <div style={{width:`${progress}%`,height:'100%',background:'var(--terra)',borderRadius:4,transition:'width 0.3s'}}/>
-            </div>
-            <span style={{fontWeight:700,fontSize:13}}>{doneCount}/{documents.filter(d=>d.status!=='not_applicable').length}</span>
-          </div>
-        </div>
-      </div>
         <div className="card">
           <div className="info-label">Postęp dokumentacji</div>
           <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4}}>
