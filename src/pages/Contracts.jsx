@@ -74,6 +74,11 @@ export default function Contracts() {
                   <span className={`badge ${getSourceBadge(c.source)}`}>{getSourceLabel(c.source)}</span>
                   <span className={`badge ${CONTRACT_STATUS[c.status]?.badge || 'badge-gray'}`}>{CONTRACT_STATUS[c.status]?.label || c.status}</span>
                   <span style={{fontSize:12,color:'var(--gray-500)'}}>nr {c.contract_number || '—'}</span>
+                {c.invoice_paid && (
+                  <span title="Faktura opłacona" style={{display:'inline-flex',alignItems:'center',gap:3,fontSize:11,fontWeight:600,color:'#166534',background:'#dcfce7',borderRadius:4,padding:'2px 7px'}}>
+                    ✓ Faktura
+                  </span>
+                )}
                 </div>
                 <div style={{fontWeight:700,fontSize:15,color:'var(--navy)',marginBottom:4}}>{c.participant_name}</div>
                 <div style={{fontSize:13,color:'var(--gray-700)'}}>{c.course_name}</div>
