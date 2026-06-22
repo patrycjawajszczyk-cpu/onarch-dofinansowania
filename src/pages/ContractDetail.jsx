@@ -177,25 +177,33 @@ export default function ContractDetail() {
           <Receipt size={18} color={contract.invoice_paid ? '#166534' : 'var(--gray-400)'}/>
           <div style={{flex:1}}>
             <div className="info-label">Faktura opłacona</div>
-            <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4}}>
-              <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',userSelect:'none'}}>
-                <input
-                  type="checkbox"
-                  checked={!!contract.invoice_paid}
-                  onChange={async e => {
-                    const val = e.target.checked
-                    await supabase.from('contracts').update({ invoice_paid: val }).eq('id', id)
-                    setContract(prev => ({ ...prev, invoice_paid: val }))
-                  }}
-                  style={{width:16,height:16,accentColor:'#166534',cursor:'pointer'}}
-                />
-                <span style={{fontSize:13,fontWeight:600,color: contract.invoice_paid ? '#166534' : 'var(--gray-500)'}}>
-                  {contract.invoice_paid ? 'Tak — faktura opłacona' : 'Nie opłacono jeszcze'}
-                </span>
-              </label>
-            </div>
+            <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',userSelect:'none',marginTop:4}}>
+              <input
+                type="checkbox"
+                checked={!!contract.invoice_paid}
+                onChange={async e => {
+                  const val = e.target.checked
+                  await supabase.from('contracts').update({ invoice_paid: val }).eq('id', id)
+                  setContract(prev => ({ ...prev, invoice_paid: val }))
+                }}
+                style={{width:16,height:16,accentColor:'#166534',cursor:'pointer'}}
+              />
+              <span style={{fontSize:13,fontWeight:600,color: contract.invoice_paid ? '#166534' : 'var(--gray-500)'}}>
+                {contract.invoice_paid ? 'Tak — faktura opłacona' : 'Nie opłacono jeszcze'}
+              </span>
+            </label>
           </div>
         </div>
+        <div className="card">
+          <div className="info-label">Postęp dokumentacji</div>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4}}>
+            <div style={{flex:1,height:8,background:'var(--gray-200)',borderRadius:4,overflow:'hidden'}}>
+              <div style={{width:`${progress}%`,height:'100%',background:'var(--terra)',borderRadius:4,transition:'width 0.3s'}}/>
+            </div>
+            <span style={{fontWeight:700,fontSize:13}}>{doneCount}/{documents.filter(d=>d.status!=='not_applicable').length}</span>
+          </div>
+        </div>
+      </div>
         <div className="card">
           <div className="info-label">Postęp dokumentacji</div>
           <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4}}>
