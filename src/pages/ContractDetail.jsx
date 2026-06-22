@@ -163,8 +163,7 @@ export default function ContractDetail() {
           </div>
         </div>
       )}
-
-      {/* Info cards */}
+{/* Info cards */}
       <div className="detail-grid">
         <div className="card">
           <div className="info-label">Termin realizacji</div>
@@ -174,9 +173,7 @@ export default function ContractDetail() {
           <div className="info-label">Wartość umowy</div>
           <div className="info-value">{contract.value ? `${Number(contract.value).toLocaleString('pl-PL')} zł` : '—'}</div>
         </div>
-        <div className="card">
-          <div className="info-label">Postęp dokumentacji</div>
-          <div className="card" style={{display:'flex',alignItems:'center',gap:12}}>
+        <div className="card" style={{display:'flex',alignItems:'center',gap:12}}>
           <Receipt size={18} color={contract.invoice_paid ? '#166534' : 'var(--gray-400)'}/>
           <div style={{flex:1}}>
             <div className="info-label">Faktura opłacona</div>
@@ -199,6 +196,16 @@ export default function ContractDetail() {
             </div>
           </div>
         </div>
+        <div className="card">
+          <div className="info-label">Postęp dokumentacji</div>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4}}>
+            <div style={{flex:1,height:8,background:'var(--gray-200)',borderRadius:4,overflow:'hidden'}}>
+              <div style={{width:`${progress}%`,height:'100%',background:'var(--terra)',borderRadius:4,transition:'width 0.3s'}}/>
+            </div>
+            <span style={{fontWeight:700,fontSize:13}}>{doneCount}/{documents.filter(d=>d.status!=='not_applicable').length}</span>
+          </div>
+        </div>
+      </div>
         <div className="card">
           <div className="info-label">Postęp dokumentacji</div>
           <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4}}>
